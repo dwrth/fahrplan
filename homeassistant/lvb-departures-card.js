@@ -79,7 +79,9 @@ class LvbDeparturesCard extends HTMLElement {
     if (this._error) {
       this._statusEl.textContent = `Fehler: ${this._error}`;
     } else if (this._data) {
-      const t = new Date(this._data.generatedAt).toLocaleTimeString("de-DE");
+      const t = new Date(this._data.generatedAt).toLocaleTimeString("de-DE", {
+        timeZone: "Europe/Berlin",
+      });
       this._statusEl.textContent = `aktualisiert ${t}`;
     }
 

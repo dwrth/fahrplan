@@ -76,8 +76,10 @@ function fmtTime(t) {
   return `${t.slice(0, 2)}:${t.slice(2, 4)}`;
 }
 
-// "103700" + date "20260604" -> epoch ms (local time, ignoring HAFAS day-offset edge cases)
-function toEpoch(date, t) {
+// "103700" + date "20260604" -> absolute epoch ms.
+// HAFAS times are German local; tzOffsetMin (from dTZOffset, e.g. 120 = UTC+2)
+// makes this independent of the server's own timezone (Netlify runs in UTC).
+function toEpoch(date, t, tzOffsetMin = 120) {
   if (!date || !t) return null;
   const y = +date.slice(0, 4);
   const mo = +date.slice(4, 6) - 1;
@@ -85,7 +87,7 @@ function toEpoch(date, t) {
   const hh = +t.slice(0, 2);
   const mm = +t.slice(2, 4);
   const ss = +(t.slice(4, 6) || "0");
-  return new Date(y, mo, d, hh, mm, ss).getTime();
+  return Date.UTC(y, mo, d, hh, mm, ss) - tzOffsetMin * 60000;
 }
 
 function rgb(c) {
@@ -114,8 +116,9 @@ export function parseStationBoard(json) {
 
     const schedTime = st.dTimeS;
     const realTime = st.dTimeR; // may be undefined when no realtime yet
-    const schedEpoch = toEpoch(j.date, schedTime);
-    const realEpoch = toEpoch(j.date, realTime);
+    const tz = st.dTZOffset ?? 120;
+    const schedEpoch = toEpoch(j.date, schedTime, tz);
+    const realEpoch = toEpoch(j.date, realTime, tz);
 
     let delayMin = null;
     if (schedEpoch != null && realEpoch != null) {

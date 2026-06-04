@@ -20,7 +20,7 @@ let state = {
 };
 
 function tickClock() {
-  els.clock.textContent = new Date().toLocaleTimeString("de-DE");
+  els.clock.textContent = new Date().toLocaleTimeString("de-DE", { timeZone: "Europe/Berlin" });
 }
 
 function countdown(epoch) {
@@ -160,7 +160,7 @@ async function load() {
     }
     renderFilters();
     renderBoard();
-    els.refresh.textContent = `aktualisiert ${new Date(data.generatedAt).toLocaleTimeString("de-DE")}`;
+    els.refresh.textContent = `aktualisiert ${new Date(data.generatedAt).toLocaleTimeString("de-DE", { timeZone: "Europe/Berlin" })}`;
   } catch (err) {
     els.error.hidden = false;
     els.error.textContent = `Abfahrten konnten nicht geladen werden: ${err.message}`;
