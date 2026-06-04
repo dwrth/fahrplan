@@ -18,7 +18,8 @@ const DEFAULTS = { url: "/api/departures", title: "Abfahrten", count: 8, refresh
 class LvbDeparturesCard extends HTMLElement {
   setConfig(config) {
     this._config = { ...DEFAULTS, ...(config || {}) };
-    this._root = this.attachShadow({ mode: "open" });
+    // attachShadow can only run once; HA may call setConfig repeatedly.
+    if (!this._root) this._root = this.attachShadow({ mode: "open" });
     this._root.innerHTML = this._template();
     this._listEl = this._root.querySelector(".list");
     this._statusEl = this._root.querySelector(".status");
@@ -163,11 +164,16 @@ function esc(s) {
   );
 }
 
-customElements.define("lvb-departures-card", LvbDeparturesCard);
+// Guard against double-registration if the module gets loaded twice.
+if (!customElements.get("lvb-departures-card")) {
+  customElements.define("lvb-departures-card", LvbDeparturesCard);
 
-window.customCards = window.customCards || [];
-window.customCards.push({
-  type: "lvb-departures-card",
-  name: "LVB Departures",
-  description: "Live LVB departure board (Leipzig) from the dashboard API.",
-});
+  window.customCards = window.customCards || [];
+  window.customCards.push({
+    type: "lvb-departures-card",
+    name: "LVB Departures",
+    description: "Live LVB departure board (Leipzig) from the dashboard API.",
+  });
+
+  console.info("%c LVB-DEPARTURES-CARD %c geladen ", "color:#fff;background:#cc0000", "");
+}

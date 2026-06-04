@@ -70,24 +70,32 @@ export async function fetchStationBoard({ lid = DEFAULT_STOP.lid, maxJny = 40 } 
   return json;
 }
 
-// "103700" -> "10:37"
-function fmtTime(t) {
-  if (!t || t.length < 4) return null;
-  return `${t.slice(0, 2)}:${t.slice(2, 4)}`;
+// HAFAS times are usually HHMMSS, but departures past midnight come as DDHHMMSS
+// where the leading digits are a day offset (e.g. "01004700" = +1 day, 00:47).
+function splitHafasTime(t) {
+  if (!t) return null;
+  const dayOffset = t.length > 6 ? +t.slice(0, t.length - 6) : 0;
+  const hms = t.slice(-6).padStart(6, "0");
+  return { dayOffset, hh: +hms.slice(0, 2), mm: +hms.slice(2, 4), ss: +hms.slice(4, 6) };
 }
 
-// "103700" + date "20260604" -> absolute epoch ms.
+// "103700" -> "10:37"; "01004700" (+1 day) -> "00:47"
+function fmtTime(t) {
+  const p = splitHafasTime(t);
+  if (!p) return null;
+  return `${String(p.hh).padStart(2, "0")}:${String(p.mm).padStart(2, "0")}`;
+}
+
+// "103700" + date "20260604" -> absolute epoch ms (day offset honored).
 // HAFAS times are German local; tzOffsetMin (from dTZOffset, e.g. 120 = UTC+2)
 // makes this independent of the server's own timezone (Netlify runs in UTC).
 function toEpoch(date, t, tzOffsetMin = 120) {
-  if (!date || !t) return null;
+  const p = splitHafasTime(t);
+  if (!date || !p) return null;
   const y = +date.slice(0, 4);
   const mo = +date.slice(4, 6) - 1;
-  const d = +date.slice(6, 8);
-  const hh = +t.slice(0, 2);
-  const mm = +t.slice(2, 4);
-  const ss = +(t.slice(4, 6) || "0");
-  return Date.UTC(y, mo, d, hh, mm, ss) - tzOffsetMin * 60000;
+  const d = +date.slice(6, 8) + p.dayOffset;
+  return Date.UTC(y, mo, d, p.hh, p.mm, p.ss) - tzOffsetMin * 60000;
 }
 
 function rgb(c) {
