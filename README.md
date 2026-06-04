@@ -35,6 +35,37 @@ netlify deploy --prod  # publish
 Or via the Netlify UI: connect the repo and deploy. `netlify.toml` already sets
 `publish = "public"`, the functions dir, and Node 20.
 
+## Home Assistant card
+
+`homeassistant/lvb-departures-card.js` is a custom Lovelace card that renders the
+board inside Home Assistant. It fetches the same `/api/departures` endpoint, so
+point it at your deployed dashboard (the API sends `Access-Control-Allow-Origin: *`
+so HA can fetch it cross-origin).
+
+1. Copy the file into your HA config: `<config>/www/lvb-departures-card.js`.
+2. Add it as a Lovelace resource (Settings → Dashboards → ⋮ → Resources):
+   - URL `/local/lvb-departures-card.js`, type **JavaScript module**.
+3. Add the card:
+
+```yaml
+type: custom:lvb-departures-card
+url: https://your-site.netlify.app/api/departures
+title: Abfahrten
+count: 8
+refresh: 30
+# stop: Erich-Köhn   # optional: filter to one stop (substring match)
+```
+
+| Option    | Default        | Meaning                                          |
+| --------- | -------------- | ------------------------------------------------ |
+| `url`     | `/api/departures` | API endpoint (use the full deployed URL)      |
+| `title`   | `Abfahrten`    | Card header                                      |
+| `count`   | `8`            | Rows to show                                     |
+| `stop`    | —              | Case-insensitive substring filter on stop name   |
+| `refresh` | `30`           | Seconds between refreshes                         |
+
+The card uses HA theme variables, so it adapts to light/dark automatically.
+
 ## Pieces
 
 | File              | Role                                                        |
@@ -43,6 +74,7 @@ Or via the Netlify UI: connect the repo and deploy. `netlify.toml` already sets
 | `server.js`       | Zero-dep HTTP server: `/api/departures` + static files (local) |
 | `netlify/functions/departures.mjs` | Same proxy as a Netlify serverless function |
 | `public/`         | Dashboard UI (auto-refresh every 30s)                        |
+| `homeassistant/lvb-departures-card.js` | Custom Lovelace card for Home Assistant |
 
 ## Changing the stop
 

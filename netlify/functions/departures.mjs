@@ -6,16 +6,20 @@ export default async (req) => {
   const url = new URL(req.url);
   const maxJny = Math.min(Number(url.searchParams.get("max")) || 40, 60);
 
+  // CORS so a Home Assistant card (different origin) can fetch this.
+  const headers = {
+    "Content-Type": "application/json; charset=utf-8",
+    "Cache-Control": "no-store",
+    "Access-Control-Allow-Origin": "*",
+  };
+
   try {
     const data = await fetchCombinedBoard({ maxJny });
-    return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" },
-    });
+    return new Response(JSON.stringify(data), { status: 200, headers });
   } catch (err) {
     return new Response(JSON.stringify({ error: String(err.message || err) }), {
       status: 502,
-      headers: { "Content-Type": "application/json; charset=utf-8" },
+      headers,
     });
   }
 };

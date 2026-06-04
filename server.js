@@ -44,12 +44,15 @@ const server = createServer(async (req, res) => {
 
   if (url.pathname === "/api/departures") {
     const maxJny = Math.min(Number(url.searchParams.get("max")) || 40, 60);
+    // CORS so a Home Assistant card (different origin) can fetch this.
+    const cors = { "Access-Control-Allow-Origin": "*" };
     try {
       const data = await fetchCombinedBoard({ maxJny });
-      send(res, 200, JSON.stringify(data), { "Content-Type": MIME[".json"] });
+      send(res, 200, JSON.stringify(data), { "Content-Type": MIME[".json"], ...cors });
     } catch (err) {
       send(res, 502, JSON.stringify({ error: String(err.message || err) }), {
         "Content-Type": MIME[".json"],
+        ...cors,
       });
     }
     return;
