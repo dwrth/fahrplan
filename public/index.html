@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LVB Abfahrten</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="dot"></span>
+        <div>
+          <h1 id="stop">Abfahrten</h1>
+          <p class="sub" id="stopSub">Live LVB · Leipzig</p>
+        </div>
+      </div>
+      <div class="status">
+        <span id="clock" class="clock">--:--:--</span>
+        <span id="refresh" class="refresh">aktualisiert —</span>
+      </div>
+    </header>
+
+    <section class="controls">
+      <div class="filters" id="stopFilters"></div>
+      <div class="filters" id="lineFilters"></div>
+    </section>
+
+    <main>
+      <div id="error" class="error" hidden></div>
+      <ul id="board" class="board"></ul>
+      <div id="empty" class="empty" hidden>Keine Abfahrten.</div>
+    </main>
+
+    <footer class="foot">
+      Aktualisierung alle 30 s · Daten via reiseauskunft.insa.de (HAFAS)
+    </footer>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

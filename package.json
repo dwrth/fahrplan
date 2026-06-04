@@ -1,0 +1,12 @@
+{
+  "name": "lvb-departures-dashboard",
+  "version": "1.0.0",
+  "description": "Small live departure-board dashboard for LVB (Leipzig) HAFAS mgate.exe data",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
