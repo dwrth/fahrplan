@@ -1,0 +1,14 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+# Local `netlify dev` serves the static site + functions together.
+[dev]
+  publish = "public"
+
+# Functions need Node 18+ for built-in fetch.
+[functions]
+  node_bundler = "esbuild"
+
+[functions.environment]
+  AWS_LAMBDA_JS_RUNTIME = "nodejs20.x"

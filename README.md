@@ -19,12 +19,29 @@ A proxy is required because the browser can't call `mgate.exe` cross-origin.
 The server (`server.js`) makes the request, the parser (`hafas.js`) flattens the
 HAFAS response, and the frontend (`public/`) renders it.
 
+## Deploy to Netlify
+
+Netlify can't run the long-lived `server.js`, so the proxy runs as a serverless
+function instead. `netlify/functions/departures.mjs` reuses `hafas.js` and is
+mapped to the same `/api/departures` path the frontend already calls, so no
+frontend change is needed.
+
+```bash
+npm i -g netlify-cli   # once
+netlify dev            # local: static site + function together
+netlify deploy --prod  # publish
+```
+
+Or via the Netlify UI: connect the repo and deploy. `netlify.toml` already sets
+`publish = "public"`, the functions dir, and Node 20.
+
 ## Pieces
 
 | File              | Role                                                        |
 | ----------------- | ----------------------------------------------------------- |
 | `hafas.js`        | Builds the mgate request + parses StationBoard into clean JSON |
-| `server.js`       | Zero-dep HTTP server: `/api/departures` + static files      |
+| `server.js`       | Zero-dep HTTP server: `/api/departures` + static files (local) |
+| `netlify/functions/departures.mjs` | Same proxy as a Netlify serverless function |
 | `public/`         | Dashboard UI (auto-refresh every 30s)                        |
 
 ## Changing the stop
